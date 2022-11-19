@@ -216,6 +216,7 @@ class VisionTransformer(nn.Module):
         self.img_size = img_size
 
         num_patches = _compute_num_patches(img_size, patch_size)
+        print(num_patches)
         self.num_branches = len(patch_size)
 
         self.patch_embed = nn.ModuleList()
@@ -291,6 +292,8 @@ class VisionTransformer(nn.Module):
             tmp = self.patch_embed[i](x_)
             cls_tokens = self.cls_token[i].expand(B, -1, -1)  # stole cls_tokens impl from Phil Wang, thanks
             tmp = torch.cat((cls_tokens, tmp), dim=1)
+            # print(tmp.shape)
+            # print(self.pos_embed[i].shape)
             tmp = tmp + self.pos_embed[i]
             tmp = self.pos_drop(tmp)
             xs.append(tmp)
@@ -316,13 +319,23 @@ class VisionTransformer(nn.Module):
 @register_model
 def crossvit_tiny_224(pretrained=False, **kwargs):
     model = VisionTransformer(img_size=[240, 224],
-                              patch_size=[12, 16], embed_dim=[96, 192], depth=[[1, 4, 0], [1, 4, 0], [1, 4, 0]],
+            patch_size=[12, 16], embed_dim=[96, 192], depth=[[1, 4, 0], [1, 4, 0], [1, 4, 0]],
                               num_heads=[3, 3], mlp_ratio=[4, 4, 1], qkv_bias=True,
                               norm_layer=partial(nn.LayerNorm, eps=1e-6), **kwargs)
     model.default_cfg = _cfg()
     if pretrained:
         state_dict = torch.hub.load_state_dict_from_url(_model_urls['crossvit_tiny_224'], map_location='cpu')
         model.load_state_dict(state_dict)
+    return model
+
+@register_model
+def crossvit_patch_test(pretrained=False, **kwargs):
+    # ml2022-project test
+    model = VisionTransformer(img_size=[182, 192],
+                              patch_size=[13, 12], embed_dim=[96, 192], depth=[[1, 4, 0], [1, 4, 0], [1, 4, 0]],
+                              num_heads=[3, 3], mlp_ratio=[4, 4, 1], qkv_bias=True,
+                              norm_layer=partial(nn.LayerNorm, eps=1e-6), **kwargs)
+    model.default_cfg = _cfg()
     return model
 
 
