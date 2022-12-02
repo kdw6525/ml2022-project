@@ -169,6 +169,10 @@ def get_args_parser():
     parser.add_argument('--auto-resume', action='store_true', help='auto resume')
     parser.add_argument('--finetune', action='store_true', help='finetune model')
     parser.add_argument('--initial_checkpoint', type=str, default='', help='path to the pretrained model')
+    
+    # PROJECT PARAMETERS, SETTING PATCH_SIZES
+
+    parser.add_argument('--patch_size', default='', help='sets the patch size')
 
     return parser
 
@@ -227,14 +231,27 @@ def main(args):
             label_smoothing=args.smoothing, num_classes=args.nb_classes)
 
     print(f"Creating model: {args.model}")
-    model = create_model(
-        args.model,
-        pretrained=args.pretrained,
-        num_classes=args.nb_classes,
-        drop_rate=args.drop,
-        drop_path_rate=args.drop_path,
-        drop_block_rate=args.drop_block,
-    )
+    if args.patch_size == '':
+        model = create_model(
+            args.model,
+            pretrained=args.pretrained,
+            num_classes=args.nb_classes,
+            drop_rate=args.drop,
+            drop_path_rate=args.drop_path,
+            drop_block_rate=args.drop_block,
+        )
+    else:
+        patch_sizes = args.patch_size.split(',')
+        patch_sizes = [int(patch_sizes[0]), int(patch_sizes[1])]
+        model = create_model(
+            args.model,
+            pretrained=args.pretrained,
+            num_classes=args.nb_classes,
+            drop_rate=args.drop,
+            drop_path_rate=args.drop_path,
+            drop_block_rate=args.drop_block,
+            patch_size=patch_sizes
+        )
 
     # TODO: finetuning
 
