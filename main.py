@@ -317,7 +317,15 @@ def main(args):
         return
 
     print(f"Start training, currnet max acc is {max_accuracy:.2f}")
+    if args.output_dir and args.auto_resume:
+        with (output_dir / "log.txt").open("r") as f:
+            logs = json.loads(f.readlines()[-1])
+            total_training_time = logs['total_time']
+    else:
+        total_training_time = 0
+
     start_time = time.time()
+    
     for epoch in range(args.start_epoch, args.epochs):
 
         if args.distributed:
@@ -357,7 +365,8 @@ def main(args):
         log_stats = {**{f'train_{k}': v for k, v in train_stats.items()},
                      **{f'test_{k}': v for k, v in test_stats.items()},
                      'epoch': epoch,
-                     'n_parameters': n_parameters}
+                     'n_parameters': n_parameters,
+                     'total_time': total_training_time + (time.time() - start_time)}
 
         if args.output_dir and utils.is_main_process():
             with (output_dir / "log.txt").open("a") as f:
