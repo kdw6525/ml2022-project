@@ -14,6 +14,7 @@ import torch
 from timm.data import Mixup
 from timm.utils import accuracy
 from einops import rearrange
+import numpy as np
 
 import utils
 
@@ -90,8 +91,10 @@ def evaluate(data_loader, model, device, world_size, distributed=True, amp=False
     targets = []
 
     for images, target in metric_logger.log_every(data_loader, 10, header):
+
         images = images.to(device, non_blocking=True)
         target = target.to(device, non_blocking=True)
+
         # compute output
         with torch.cuda.amp.autocast(enabled=amp):
             output = model(images)
@@ -106,6 +109,39 @@ def evaluate(data_loader, model, device, world_size, distributed=True, amp=False
     num_data = len(data_loader.dataset)
     outputs = torch.cat(outputs, dim=0)
     targets = torch.cat(targets, dim=0)
+
+    # True positives, false positives, and false negatives per class
+    class_tp = np.zeros(outputs.size(1))
+    class_fp = np.zeros(outputs.size(1))
+    class_fn = np.zeros(outputs.size(1))
+    
+    # TODO: maybe make this another output of the accuracy function?
+    # Counts false positives and negatives for incorrect classifications
+    # and true positives for correct classifications
+    for i in range(0, num_data):
+        pred_class = torch.argmax(outputs[i])
+        true_class = targets[i]
+
+        if pred_class != true_class:
+            class_fp[pred_class] += 1
+            class_fn[true_class] += 1
+        else:
+            class_tp[pred_class] += 1
+
+    print("True Positives: ", class_tp)
+    print("False Positives: ", class_fp)
+    print("False Negatives: ", class_fn)
+
+    # Recall = TP / (TP + FN)
+    recall = np.divide( class_tp, np.add(class_tp, class_fn) )
+
+    # TODO: fix division by zero
+    # Precision = TP / (TP + FP)
+    precision = np.divide( class_tp, np.add(class_tp, class_fp) )
+
+    print("Recall per class: ", recall)
+    print("Precision per class: ", precision)
+
     real_acc1, real_acc5 = accuracy(outputs[:num_data], targets[:num_data], topk=(1, 5))
     real_loss = criterion(outputs, targets)
     metric_logger.update(loss=real_loss.item())
