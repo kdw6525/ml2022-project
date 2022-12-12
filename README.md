@@ -21,7 +21,7 @@ conda install pytorch=1.7.1 torchvision  cudatoolkit=11.0 -c pytorch -c nvidia
 pip install -r requirements.txt
 ```
 
-Using crossvit.yml:
+Conda using crossvit.yml:
 
 ```
 conda env create -f crossvit.yml
