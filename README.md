@@ -1,19 +1,8 @@
 # CrossViT
 
-This repository is the official implementation of CrossViT: Cross-Attention Multi-Scale Vision Transformer for Image Classification. [ArXiv](https://arxiv.org/abs/2103.14899)
+This repository is a clone of the official [CrossViT Implementation](https://github.com/IBM/CrossViT). 
 
-If you use the codes and models from this repo, please cite our work. Thanks!
-
-```
-@inproceedings{
-    chen2021crossvit,
-    title={{CrossViT: Cross-Attention Multi-Scale Vision Transformer for Image Classification}},
-    author={Chun-Fu (Richard) Chen and Quanfu Fan and Rameswar Panda},
-    booktitle={International Conference on Computer Vision (ICCV)},
-    year={2021}
-}
-```
-
+Which implements the model from the [ArXiv](https://arxiv.org/abs/2103.14899) paper, and is cited in the writeup.
 
 ## Installation
 
@@ -34,72 +23,31 @@ pip install -r requirements.txt
 
 ## Data preparation
 
-Download and extract ImageNet train and val images from http://image-net.org/.
-The directory structure is the standard layout for the torchvision [`datasets.ImageFolder`](https://pytorch.org/docs/stable/torchvision/datasets.html#imagefolder), and the training and validation data is expected to be in the `train/` folder and `val` folder respectively:
-
-```
-/path/to/imagenet/
-  train/
-    class1/
-      img1.jpeg
-    class2/
-      img2.jpeg
-  val/
-    class1/
-      img3.jpeg
-    class/2
-      img4.jpeg
-```
+The CIFAR-10 data set will automatically be downloaded when the model is run.
 
 ## Pretrained models
 
-We provide models trained on ImageNet1K. You can find models [here](https://github.com/IBM/CrossViT/releases/tag/weights-0.1).
-And you can load pretrained weights into models by add `--pretrained` flag.
-
+We have 5 pretrained models included, they are in the checkpoint/X_X/ where X is the patch sizes of the model.
+Details about each epoch is saved in the log.txt file in each directory.
 
 ## Training
 
-To train `crossvit_9_dagger_224` on ImageNet on a single node with 8 gpus for 300 epochs run:
+The command we used to train a `crossvit_patch_test` on CIFAR-10 (CIFAR-10 will automatically be downloaded):
 
 ```shell script
-
-python -m torch.distributed.launch --nproc_per_node=8 --use_env main.py --model crossvit_9_dagger_224 --batch-size 256 --data-path /path/to/imagenet
+python -m torch.distributed.launch --nproc_per_node=1 --use_env main.py --model crossvit_patch_test --batch-size 100 --epochs 200 --patch_size X,X --data-set CIFAR10 --data-path ./CIFAR10/ --output_dir checkpoints/X_X/ 
 ```
 
-Other model names can be found at [models/crossvit.py](models/crossvit.py).
+Resuming training requires adding one additional flag.
 
-## Multinode training
-
-Distributed training is available via Slurm and `submitit`:
-
-To train a `crossvit_9_dagger_224` model on ImageNet on 4 nodes with 8 gpus each for 300 epochs:
-
-```
-python run_with_submitit.py --nodes 4 --model crossvit_9_dagger_224 --data-path /path/to/imagenet --batch-size 128 --warmup-epochs 30
-```
-
-Or you can start process on each machine maunally. E.g. 2 nodes, each with 8 gpus.
-
-Machine 0:
 ```shell script
-
-python -m torch.distributed.launch --nproc_per_node=8 --master_addr=MACHINE_0_IP --master_port=AVAILABLE_PORT --nnodes=2 --node_rank=0 main.py --model crossvit_9_dagger_224 --batch-size 256 --data-path /path/to/imagenet
+python -m torch.distributed.launch --nproc_per_node=1 --use_env main.py --model crossvit_patch_test --batch-size 100 --epochs 200 --patch_size X,X --data-set CIFAR10 --data-path ./CIFAR10/ --output_dir checkpoints/X_X/ --auto-resume
 ```
-
-Machine 1:
-```shell script
-
-python -m torch.distributed.launch --nproc_per_node=8 --master_addr=MACHINE_0_IP --master_port=AVAILABLE_PORT --nnodes=2 --node_rank=1 main.py --model crossvit_9_dagger_224 --batch-size 256 --data-path /path/to/imagenet
-```
-
-
-Note that: some slurm configurations might need to be changed based on your cluster.
-
 
 ## Evaluation
 
-To evaluate a pretrained model on `crossvit_9_dagger_224`:
+To evaluate a model:
 
-```
-python -m torch.distributed.launch --nproc_per_node=8 --use_env main.py --model crossvit_9_dagger_224 --batch-size 128 --data-path /path/to/imagenet --eval --pretrained
+```shell script
+python -m torch.distributed.launch --nproc_per_node=1 --use_env main.py --model crossvit_patch_test --batch-size 100 --data-set CIFAR10 --data-path ./CIFAR10/ --patch_size X,X --initial_checkpoint checkpoints/X_X/model_best.pth --eval
 ```
