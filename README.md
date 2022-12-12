@@ -24,7 +24,7 @@ pip install -r requirements.txt
 Using crossvit.yml:
 
 ```
-conda env create -f environment.yml
+conda env create -f crossvit.yml
 ```
 
 ## Data preparation
