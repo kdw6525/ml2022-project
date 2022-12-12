@@ -51,3 +51,6 @@ To evaluate a model:
 ```shell script
 python -m torch.distributed.launch --nproc_per_node=1 --use_env main.py --model crossvit_patch_test --batch-size 100 --data-set CIFAR10 --data-path ./CIFAR10/ --patch_size X,X --initial_checkpoint checkpoints/X_X/model_best.pth --eval
 ```
+
+## Modifications for ML 2022 Experiment
+Modifications made for our experiment will be enclosed in a pair of comments reading `ML2022 CHANGES START` and `ML2022 CHANGES END`
