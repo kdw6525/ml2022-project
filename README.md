@@ -21,6 +21,12 @@ conda install pytorch=1.7.1 torchvision  cudatoolkit=11.0 -c pytorch -c nvidia
 pip install -r requirements.txt
 ```
 
+Using crossvit.yml:
+
+```
+conda env create -f environment.yml
+```
+
 ## Data preparation
 
 The CIFAR-10 data set will automatically be downloaded when the model is run.
