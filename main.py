@@ -170,9 +170,9 @@ def get_args_parser():
     parser.add_argument('--finetune', action='store_true', help='finetune model')
     parser.add_argument('--initial_checkpoint', type=str, default='', help='path to the pretrained model')
     
-    # PROJECT PARAMETERS, SETTING PATCH_SIZES
-
+    # ML2022 CHANGES START
     parser.add_argument('--patch_size', default='', help='sets the patch size')
+    # ML2022 CHANGES END
 
     return parser
 
@@ -231,6 +231,7 @@ def main(args):
             label_smoothing=args.smoothing, num_classes=args.nb_classes)
 
     print(f"Creating model: {args.model}")
+    # ML2022 CHANGES START
     if args.patch_size == '':
         model = create_model(
             args.model,
@@ -252,6 +253,7 @@ def main(args):
             drop_block_rate=args.drop_block,
             patch_size=patch_sizes
         )
+    # ML2022 CHANGES END
 
     # TODO: finetuning
 
@@ -317,13 +319,14 @@ def main(args):
         return
 
     print(f"Start training, currnet max acc is {max_accuracy:.2f}")
+    # ML2022 CHANGES START
     if args.output_dir and args.auto_resume:
         with (output_dir / "log.txt").open("r") as f:
             logs = json.loads(f.readlines()[-1])
             total_training_time = logs['total_time']
     else:
         total_training_time = 0
-
+    # ML2022 CHANGES END
     start_time = time.time()
     
     for epoch in range(args.start_epoch, args.epochs):
@@ -366,7 +369,10 @@ def main(args):
                      **{f'test_{k}': v for k, v in test_stats.items()},
                      'epoch': epoch,
                      'n_parameters': n_parameters,
-                     'total_time': total_training_time + (time.time() - start_time)}
+                     # ML2022 CHANGES START
+                     'total_time': total_training_time + (time.time() - start_time)
+                     # ML2022 CHANGES END
+                     }
 
         if args.output_dir and utils.is_main_process():
             with (output_dir / "log.txt").open("a") as f:

@@ -110,6 +110,7 @@ def evaluate(data_loader, model, device, world_size, distributed=True, amp=False
     outputs = torch.cat(outputs, dim=0)
     targets = torch.cat(targets, dim=0)
 
+    # ML2022 CHANGES START
     # True positives, false positives, and false negatives per class
     class_tp = np.zeros(outputs.size(1))
     class_fp = np.zeros(outputs.size(1))
@@ -141,6 +142,7 @@ def evaluate(data_loader, model, device, world_size, distributed=True, amp=False
 
     print("Recall per class: ", recall)
     print("Precision per class: ", precision)
+    # ML2022 CHANGES END
 
     real_acc1, real_acc5 = accuracy(outputs[:num_data], targets[:num_data], topk=(1, 5))
     real_loss = criterion(outputs, targets)
