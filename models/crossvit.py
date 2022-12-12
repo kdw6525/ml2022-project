@@ -336,7 +336,7 @@ def crossvit_tiny_224(pretrained=False, **kwargs):
 @register_model
 def crossvit_patch_test(pretrained=False, **kwargs):
     # ml2022-project test
-    model = VisionTransformer(img_size=[240, 224],
+    model = VisionTransformer(img_size=[32, 32],
                               embed_dim=[96, 192], depth=[[1, 4, 0], [1, 4, 0], [1, 4, 0]],
                               num_heads=[3, 3], mlp_ratio=[4, 4, 1], qkv_bias=True,
                               norm_layer=partial(nn.LayerNorm, eps=1e-6), **kwargs)
